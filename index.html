@@ -63,9 +63,9 @@
     const BASE_URL = 'https://newsdata.io/api/1/latest';
 
     // Function to fetch and display news
-    async function fetchNews(query = 'general') {
+    async function fetchNews(category = 'general', country = 'us') {
       try {
-        const url = `${BASE_URL}?apikey=${API_KEY}&q=${query}`;
+        const url = `https://newsdata.io/api/1/latest?apikey=pub_6146517d4ea86b3d3642d508156307f3e640a&q=${category}`;
         console.log(url);
         const response = await fetch(url);
         console.log(response);
@@ -85,7 +85,15 @@
         const newsContainer = document.getElementById('news-container');
         newsContainer.innerHTML = ''; // Clear existing news
 
+        // Track the displayed article IDs to avoid duplicates
+        const displayedArticleIds = new Set();
+
         data.results.forEach((article) => {
+          // If this article has already been displayed, skip it
+          if (displayedArticleIds.has(article.article_id)) return;
+
+          displayedArticleIds.add(article.article_id);
+
           const newsCard = `
         <div class="bg-white rounded shadow p-4">
           <img src="${article.image_url || 'https://via.placeholder.com/150'}" alt="${article.title}" class="rounded w-full h-48 object-cover">
@@ -102,6 +110,7 @@
         document.getElementById('news-container').innerHTML = `<p class="text-center text-red-600">${error.message}</p>`;
       }
     }
+
 
     // Initial Load: Fetch News for "pizza" as default query
     fetchNews();
