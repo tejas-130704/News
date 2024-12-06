@@ -67,8 +67,9 @@
     async function fetchNews(category = 'general', country = 'us') {
       try {
         const url = `${BASE_URL}?apiKey=${API_KEY}&category=${category}&language=en`;
+        console.log(url)
         const response = await fetch(url);
-
+        console.log(response)
         if (!response.ok) {
           // If response is not OK, display an error message
           throw new Error('Failed to fetch news. Please check your API key or subscription.');
