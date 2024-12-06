@@ -44,7 +44,6 @@
     </div>
   </nav>
 
-
   <!-- Main Content -->
   <div class="container mx-auto p-4">
     <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -60,16 +59,17 @@
       mobileMenu.firstElementChild.classList.toggle('hidden');
     });
 
-    const API_KEY = 'ddac099e98d340c38124018a5f1ba9b7'; // Replace with your NewsAPI key
-    const BASE_URL = 'https://newsapi.org/v2/top-headlines';
+    const API_KEY = 'pub_6146517d4ea86b3d3642d508156307f3e640a'; // Replace with your NewsAPI key
+    const BASE_URL = 'https://newsdata.io/api/1/latest';
 
     // Function to fetch and display news
-    async function fetchNews(category = 'general', country = 'us') {
+    async function fetchNews(query = 'general') {
       try {
-        const url = `${BASE_URL}?apiKey=${API_KEY}&category=${category}&language=en`;
-        console.log(url)
+        const url = `${BASE_URL}?apikey=${API_KEY}&q=${query}`;
+        console.log(url);
         const response = await fetch(url);
-        console.log(response)
+        console.log(response);
+
         if (!response.ok) {
           // If response is not OK, display an error message
           throw new Error('Failed to fetch news. Please check your API key or subscription.');
@@ -77,7 +77,7 @@
 
         const data = await response.json();
 
-        if (!data || !data.articles || data.articles.length === 0) {
+        if (!data || !data.results || data.results.length === 0) {
           document.getElementById('news-container').innerHTML = `<p class="text-center text-gray-600">No news articles found or an issue occurred.</p>`;
           return;
         }
@@ -85,13 +85,13 @@
         const newsContainer = document.getElementById('news-container');
         newsContainer.innerHTML = ''; // Clear existing news
 
-        data.articles.forEach((article) => {
+        data.results.forEach((article) => {
           const newsCard = `
         <div class="bg-white rounded shadow p-4">
-          <img src="${article.urlToImage || 'https://via.placeholder.com/150'}" alt="${article.title}" class="rounded w-full h-48 object-cover">
+          <img src="${article.image_url || 'https://via.placeholder.com/150'}" alt="${article.title}" class="rounded w-full h-48 object-cover">
           <h2 class="text-lg font-bold mt-2">${article.title}</h2>
           <p class="text-gray-600">${article.description || 'No description available.'}</p>
-          <a href="${article.url}" target="_blank" class="text-blue-500 hover:underline mt-2 block">Read more</a>
+          <a href="${article.link}" target="_blank" class="text-blue-500 hover:underline mt-2 block">Read more</a>
         </div>
       `;
           newsContainer.innerHTML += newsCard;
@@ -103,7 +103,7 @@
       }
     }
 
-    // Initial Load: Fetch General News
+    // Initial Load: Fetch News for "pizza" as default query
     fetchNews();
   </script>
 </body>
