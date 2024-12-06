@@ -53,39 +53,35 @@
   </div>
 
   <script>
-    const API_KEY = "507eee5240d5e398dac10c2bc347f282"; // Replace with your Mediastack API key
-    const BASE_URL = 'http://api.mediastack.com/v1/news';
-
-
-
     const menuToggle = document.getElementById('menu-toggle');
     const mobileMenu = document.getElementById('mobile-menu');
 
     menuToggle.addEventListener('click', () => {
       mobileMenu.firstElementChild.classList.toggle('hidden');
     });
-
-
+  
+    const API_KEY = 'ddac099e98d340c38124018a5f1ba9b7'; // Replace with your NewsAPI key
+    const BASE_URL = 'https://newsapi.org/v2/top-headlines';
 
     // Function to fetch and display news
-    async function fetchNews(category = 'business', countries = 'all') {
+    async function fetchNews(category = 'general', country = 'us') {
       try {
-        const url = `${BASE_URL}?access_key=${API_KEY}&categories=${category}&languages=en`;
+        const url = `${BASE_URL}?apiKey=${API_KEY}&category=${category}&language=en`;
         const response = await fetch(url);
         const data = await response.json();
 
         const newsContainer = document.getElementById('news-container');
         newsContainer.innerHTML = ''; // Clear existing news
 
-        if (data.data.length === 0) {
+        if (data.articles.length === 0) {
           newsContainer.innerHTML = `<p class="text-center text-gray-600">No news articles found.</p>`;
           return;
         }
 
-        data.data.forEach((article) => {
+        data.articles.forEach((article) => {
           const newsCard = `
             <div class="bg-white rounded shadow p-4">
-              <img src="${article.image || 'https://via.placeholder.com/150'}" alt="${article.title}" class="rounded w-full h-48 object-cover">
+              <img src="${article.urlToImage || 'https://via.placeholder.com/150'}" alt="${article.title}" class="rounded w-full h-48 object-cover">
               <h2 class="text-lg font-bold mt-2">${article.title}</h2>
               <p class="text-gray-600">${article.description || 'No description available.'}</p>
               <a href="${article.url}" target="_blank" class="text-blue-500 hover:underline mt-2 block">Read more</a>
@@ -99,7 +95,7 @@
       }
     }
 
-    // Initial Load: Fetch Business News
+    // Initial Load: Fetch General News
     fetchNews();
   </script>
 </body>
