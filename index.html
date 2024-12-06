@@ -1,88 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News Fetching</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal News Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-gray-100">
-    <div class="container mx-auto py-6">
-        <h1 class="text-3xl font-bold text-center mb-6">Business News</h1>
-        <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- News cards will be appended here -->
-        </div>
-        <div class="text-center mt-6">
-            <button 
-                id="load-more" 
-                class="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600"
-                onclick="fetchNews()">
-                Load More
-            </button>
-        </div>
+  <!-- Navbar -->
+  <nav class="bg-blue-600 text-white p-4">
+    <div class="container mx-auto flex items-center justify-between">
+      <!-- Logo -->
+      <h1 class="text-2xl font-bold">Universal News</h1>
+
+      <!-- Hamburger Icon (Visible on Small Screens) -->
+      <button class="block lg:hidden text-white focus:outline-none" id="menu-toggle">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+        </svg>
+      </button>
+
+      <!-- Navigation Links -->
+      <ul class="hidden lg:flex space-x-4 mt-4 lg:mt-0" id="menu">
+        <li><a href="#" class="hover:underline" onclick="fetchNews('business')">Business</a></li>
+        <li><a href="#" class="hover:underline" onclick="fetchNews('sports')">Sports</a></li>
+        <li><a href="#" class="hover:underline" onclick="fetchNews('entertainment')">Entertainment</a></li>
+        <li><a href="#" class="hover:underline" onclick="fetchNews('health')">Health</a></li>
+        <li><a href="#" class="hover:underline" onclick="fetchNews('technology')">Technology</a></li>
+      </ul>
     </div>
 
-    <script>
-        const API_KEY = "507eee5240d5e398dac10c2bc347f282"; // Replace with your API key
-        const LIMIT = 6; // Number of articles per page
-        let offset = 0;
+    <!-- Mobile Menu -->
+    <div class="lg:hidden" id="mobile-menu">
+      <ul class="hidden flex-col space-y-2 p-4">
+        <li><a href="#" class="hover:underline" onclick="fetchNews('business')">Business</a></li>
+        <li><a href="#" class="hover:underline" onclick="fetchNews('sports')">Sports</a></li>
+        <li><a href="#" class="hover:underline" onclick="fetchNews('entertainment')">Entertainment</a></li>
+        <li><a href="#" class="hover:underline" onclick="fetchNews('health')">Health</a></li>
+        <li><a href="#" class="hover:underline" onclick="fetchNews('technology')">Technology</a></li>
+      </ul>
+    </div>
+  </nav>
 
-        async function fetchNews() {
-            try {
-                // Fetching US and India business news
-                const usNews = `http://api.mediastack.com/v1/news?access_key=${API_KEY}&countries=us&categories=business&limit=${LIMIT}&offset=${offset}`;
-                const indiaNews = `http://api.mediastack.com/v1/news?access_key=${API_KEY}&countries=in&categories=business&limit=${LIMIT}&offset=${offset}`;
 
-                const [usResponse, indiaResponse] = await Promise.all([
-                    fetch(usNews),
-                    fetch(indiaNews),
-                ]);
+  <!-- Main Content -->
+  <div class="container mx-auto p-4">
+    <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- News Articles Will Be Injected Here -->
+    </div>
+  </div>
 
-                const usData = await usResponse.json();
-                const indiaData = await indiaResponse.json();
+  <script>
+    const API_KEY = "507eee5240d5e398dac10c2bc347f282"; // Replace with your Mediastack API key
+    const BASE_URL = 'http://api.mediastack.com/v1/news';
 
-                // Combine US and India news
-                const newsData = [...usData.data, ...indiaData.data];
 
-                // Display news cards
-                displayNews(newsData);
 
-                // Increment offset for pagination
-                offset += LIMIT;
-            } catch (error) {
-                console.error("Error fetching news:", error);
-            }
+    const menuToggle = document.getElementById('menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    menuToggle.addEventListener('click', () => {
+      mobileMenu.firstElementChild.classList.toggle('hidden');
+    });
+
+
+
+    // Function to fetch and display news
+    async function fetchNews(category = 'business', countries = 'all') {
+      try {
+        const url = `${BASE_URL}?access_key=${API_KEY}&categories=${category}&languages=en`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const newsContainer = document.getElementById('news-container');
+        newsContainer.innerHTML = ''; // Clear existing news
+
+        if (data.data.length === 0) {
+          newsContainer.innerHTML = `<p class="text-center text-gray-600">No news articles found.</p>`;
+          return;
         }
 
-        function displayNews(newsArray) {
-            const container = document.getElementById("news-container");
+        data.data.forEach((article) => {
+          const newsCard = `
+            <div class="bg-white rounded shadow p-4">
+              <img src="${article.image || 'https://via.placeholder.com/150'}" alt="${article.title}" class="rounded w-full h-48 object-cover">
+              <h2 class="text-lg font-bold mt-2">${article.title}</h2>
+              <p class="text-gray-600">${article.description || 'No description available.'}</p>
+              <a href="${article.url}" target="_blank" class="text-blue-500 hover:underline mt-2 block">Read more</a>
+            </div>
+          `;
+          newsContainer.innerHTML += newsCard;
+        });
+      } catch (error) {
+        console.error('Error fetching news:', error);
+        alert('An error occurred while fetching news.');
+      }
+    }
 
-            newsArray.forEach((news) => {
-                const card = document.createElement("div");
-                card.className = "bg-white rounded shadow p-4";
-                console.log(news.image);
-                card.innerHTML = `
-                    <img 
-                        src="${news.image || 'https://via.placeholder.com/150'}" 
-                        alt="News Image" 
-                        class="w-full h-48 object-cover rounded mb-4"
-                    />
-                    <h2 class="text-xl font-semibold mb-2">${news.title}</h2>
-                    <p class="text-gray-700 mb-4">${news.description || "No description available."}</p>
-                    <a 
-                        href="${news.url}" 
-                        target="_blank" 
-                        class="text-blue-500 underline">
-                        Read more
-                    </a>
-                `;
-
-                container.appendChild(card);
-            });
-        }
-
-        // Initial fetch
-        fetchNews();
-    </script>
+    // Initial Load: Fetch Business News
+    fetchNews();
+  </script>
 </body>
+
 </html>
